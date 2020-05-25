@@ -78,5 +78,9 @@ def play_random_album():
         print('Could not authenticate.')
 
 while True:
-    input("Hit return")
-    play_random_album()
+    try:
+        input("Hit return")
+        play_random_album()
+    except Exception as e:
+        logging.error("Ignoring exception: %s", str(e))
+
