@@ -1,13 +1,25 @@
 import spotipy
 import creds
+import config
 import spotipy.util as util
-import pprint # For debugging
 import random
 
-username  = 'gothick'
-scope = 'streaming user-read-playback-state user-modify-playback-state playlist-read-private app-remote-control'
+import argparse
+import logging
 
-pp = pprint.PrettyPrinter(indent=4)
+# http://stackoverflow.com/q/14097061/78845
+parser = argparse.ArgumentParser(
+    description='A script to play the entire album of a track randomly selected from a playlist on a particular device.'
+)
+parser.add_argument("-v", "--verbose", help="increase output verbosity",
+                    action="store_true")
+
+args = parser.parse_args()
+if args.verbose:
+    logging.basicConfig(level=logging.DEBUG)
+
+# Spotify app scopes (permissions)
+scope = 'streaming user-read-playback-state user-modify-playback-state playlist-read-private app-remote-control'
 
 def find_playlist_by_name(sp, name):
     results = sp.current_user_playlists(limit = 50, offset = 0)
@@ -27,9 +39,8 @@ def find_device_id_by_name(sp, name):
     if device:
         return device['id']
 
-
 token = util.prompt_for_user_token(
-    username,
+    config.USERNAME,
     scope,
     client_id = creds.SPOTIPY_CLIENT_ID,
     client_secret = creds.SPOTIPY_CLIENT_SECRET,
@@ -39,7 +50,7 @@ token = util.prompt_for_user_token(
 if token:
     sp = spotipy.Spotify(auth=token)
     # Find our Future Listening playlist.
-    playlist = find_playlist_by_name(sp, "Future Listening")
+    playlist = find_playlist_by_name(sp, config.PLAYLIST)
     total_tracks = playlist['tracks']['total']
 
     while True:
@@ -51,22 +62,16 @@ if token:
         print(f"...from an album called {track['album']['name']}")
         track_count = track['album']['total_tracks']
         print(f"...with {track_count} tracks.")
-        if track_count > 4:
+        if track_count > config.ALBUM_MINIMUM_TRACKS:
             break
-        print("Trying again to find a bigger album")
-        #pp.pprint(track['album'])
-        #pp.pprint(track['album']['total_tracks'])
-        # print(f"Found track {track['album']['name']}")
+        print('Trying again to find a bigger album')
 
     # Found an album with a decent number of tracks. Play it!
-    device_id = find_device_id_by_name(sp, 'Stereo Sub Pair')
-
-    # pp.pprint(track['album'])
+    device_id = find_device_id_by_name(sp, config.DEVICE_NAME)
     album_uri = track['album']['uri']
-    print(album_uri)
-    # pp.pprint(sp.devices())
-
     sp.start_playback(context_uri = album_uri, device_id = device_id)
-
+    print("Started playback of entire album.")
 else:
+    # Getting the token will likely throw an exception rather than
+    # just return Nothing, but just in case...
     print('Could not authenticate.')
