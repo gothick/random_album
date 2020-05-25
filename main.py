@@ -62,7 +62,7 @@ if token:
         print(f"...from an album called {track['album']['name']}")
         track_count = track['album']['total_tracks']
         print(f"...with {track_count} tracks.")
-        if track_count > config.ALBUM_MINIMUM_TRACKS:
+        if track_count >= config.ALBUM_MINIMUM_TRACKS:
             break
         print('Trying again to find a bigger album')
 
