@@ -7,6 +7,10 @@ import random
 import argparse
 import logging
 
+from gpiozero import Button, LED
+from signal import pause
+
+
 # http://stackoverflow.com/q/14097061/78845
 parser = argparse.ArgumentParser(
     description='A script to play the entire album of a track randomly selected from a playlist on a particular device.'
@@ -77,10 +81,20 @@ def play_random_album():
         # just return Nothing, but just in case...
         print('Could not authenticate.')
 
-while True:
-    try:
-        input("Hit return")
-        play_random_album()
-    except Exception as e:
-        logging.error("Ignoring exception: %s", str(e))
+#while True:
+#    try:
+#        input("Hit return")
+#        play_random_album()
+#    except Exception as e:
+#        logging.error("Ignoring exception: %s", str(e))
 
+led = LED(17)
+
+def do_stuff():
+    led.blink(on_time = 0.3, n = 1)
+    play_random_album()
+    led.blink(on_time = 0.1, off_time = 0.1, n = 3)
+    
+button = Button(27)
+button.when_pressed = do_stuff
+pause()
