@@ -7,9 +7,9 @@ import random
 import argparse
 import logging
 
-from gpiozero import Button, LED
+from gpiozero import Button, LED, PWMLED
 from signal import pause
-
+from time import sleep
 
 # http://stackoverflow.com/q/14097061/78845
 parser = argparse.ArgumentParser(
@@ -17,6 +17,7 @@ parser = argparse.ArgumentParser(
 )
 parser.add_argument("-v", "--verbose", help="increase output verbosity",
                     action="store_true")
+parser.add_argument("-t", "--test", help="just pretend to trigger spotify", action="store_true")
 
 args = parser.parse_args()
 if args.verbose:
@@ -88,13 +89,18 @@ def play_random_album():
 #    except Exception as e:
 #        logging.error("Ignoring exception: %s", str(e))
 
-led = LED(17)
+led = PWMLED(17, active_high = False)
 
 def do_stuff():
     led.blink(on_time = 0.3, n = 1)
-    play_random_album()
+    if args.test:
+        print('playing')
+        sleep(1)
+    else:
+        play_random_album()
     led.blink(on_time = 0.1, off_time = 0.1, n = 3)
-    
+
+print('Ready')
 button = Button(27)
 button.when_pressed = do_stuff
 pause()
