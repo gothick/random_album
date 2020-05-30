@@ -25,14 +25,19 @@ if args.verbose == 2:
 gpio_available = True
 try:
     from gpiozero import Button, LED, PWMLED
-    from signal import pause
+    from signal import pause,signal,SIGTERM
     logging.info('Gpiozero found')
 except ImportError:
     gpio_available = False
     logging.info('Gpiozero not available')
 
+def sigterm_handler(signal, frame):
+    led.close()
+
 if gpio_available:
     led = PWMLED(17, active_high = False)
+    signal(SIGTERM, sigterm_handler)
+    
 print('Ready')
 
 def do_stuff():
