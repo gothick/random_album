@@ -101,6 +101,6 @@ def do_stuff():
     led.blink(on_time = 0.1, off_time = 0.1, n = 3)
 
 print('Ready')
-button = Button(27)
+button = Button(27) # Defaults to pull-up using internal resistor
 button.when_pressed = do_stuff
 pause()
