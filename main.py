@@ -6,15 +6,6 @@ import argparse
 import logging
 from time import sleep
 
-gpio_available = True
-try:
-    from gpiozero import Button, LED, PWMLED
-    from signal import pause
-    logging.info('Gpiozero found')
-except ImportError:
-    gpio_available = False
-    logging.info('Gpiozero not available')
-
 # http://stackoverflow.com/q/14097061/78845
 parser = argparse.ArgumentParser(
     description='A script to play the entire album of a track randomly selected from a playlist on a particular device.'
@@ -29,6 +20,16 @@ if args.verbose == 1:
 
 if args.verbose == 2:
     logging.basicConfig(level=logging.DEBUG)
+
+# We may not be running on a Pi
+gpio_available = True
+try:
+    from gpiozero import Button, LED, PWMLED
+    from signal import pause
+    logging.info('Gpiozero found')
+except ImportError:
+    gpio_available = False
+    logging.info('Gpiozero not available')
 
 if gpio_available:
     led = PWMLED(17, active_high = False)
