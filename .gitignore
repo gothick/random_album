@@ -6,6 +6,9 @@ config.py
 # Spotipy Caches
 .cache-*
 
+# Emacs
+*~
+
 # macOS
 # General
 .DS_Store
