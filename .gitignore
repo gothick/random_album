@@ -1,6 +1,7 @@
-# Credentials files for testing; obviously don't want those in source control :)
-creds.sh
+# Credentials and config; don't want them in source control. We have
+# example files instead.
 creds.py
+config.py
 
 # Spotipy Caches
 .cache-*
