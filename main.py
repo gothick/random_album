@@ -35,7 +35,7 @@ def sigterm_handler(signal, frame):
     led.close()
 
 if gpio_available:
-    led = PWMLED(17, active_high = False)
+    led = PWMLED(26, active_high = False)
     signal(SIGTERM, sigterm_handler)
     
 print('Ready')
@@ -59,7 +59,7 @@ def do_stuff():
         led.blink(on_time = 0.1, off_time = 0.1, n = 3)
 
 if gpio_available:
-    button = Button(27) # Defaults to pull-up using internal resistor
+    button = Button(6) # Defaults to pull-up using internal resistor
     button.when_pressed = do_stuff
     pause()
 else:
