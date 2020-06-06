@@ -2,6 +2,7 @@ USERNAME="gothick"
 DEVICE_NAME="Stereo Sub Pair"
 PLAYLIST="Future Listening"
 ALBUM_MINIMUM_TRACKS=4
+
 # Rasperry Pi GPIO pin assignments
-GPIO_LED=17
-GPIO_BUTTON=27
+GPIO_LED=26
+GPIO_BUTTON=6
