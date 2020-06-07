@@ -53,7 +53,9 @@ def play_random_album(client_id, client_secret, redirect_uri, username, target_p
             print('Trying again to find a bigger album')
 
         # Found an album with a decent number of tracks. Play it!
-        device_id = find_device_id_by_name(sp, device_name)
+        device_id = None
+        if device_name is not None:
+            device_id = find_device_id_by_name(sp, device_name)
         album_uri = track['album']['uri']
         sp.start_playback(context_uri = album_uri, device_id = device_id)
         print("Started playback of entire album.")

@@ -35,6 +35,7 @@ def sigterm_handler(signal, frame):
     # If systemd kills our process we want to shut down gracefully, releasing
     # our GPIO pins and as a side-effect, turning off the LED.
     button.close()
+    shift_button.close()
     led.close()
 
 if gpio_available:
@@ -44,6 +45,10 @@ if gpio_available:
 print('Ready')
 
 def do_stuff():
+    device_name = config.DEVICE_NAME
+    if shift_button.is_pressed:
+        device_name = None
+        logging.info('Shift key hold detected')
     if gpio_available:
         led.blink(on_time = 0.3, n = 1)
     if args.test:
@@ -56,13 +61,14 @@ def do_stuff():
             creds.REDIRECT_URI,
             config.USERNAME,
             config.PLAYLIST,
-            config.DEVICE_NAME,
+            device_name,
             config.ALBUM_MINIMUM_TRACKS)
     if gpio_available:
         led.blink(on_time = 0.1, off_time = 0.1, n = 3)
 
 if gpio_available:
     button = Button(config.GPIO_BUTTON) # Defaults to pull-up using internal resistor
+    shift_button = Button(config.GPIO_SHIFT_BUTTON) # Hold this button down to do something different
     button.when_pressed = do_stuff
     pause()
 else:
