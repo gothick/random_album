@@ -45,7 +45,7 @@ if gpio_available:
 
 print('Ready')
 
-def stop_stuff():
+def play_pause():
     toggle_playback(
         creds.SPOTIPY_CLIENT_ID,
         creds.SPOTIPY_CLIENT_SECRET,
@@ -83,9 +83,10 @@ if gpio_available:
     shift_button = Button(config.GPIO_SHIFT_BUTTON) # Hold this button down to do something different
     stop_button = Button(config.GPIO_STOP_BUTTON)
     button.when_pressed = do_stuff
-    stop_button.when_pressed = stop_stuff
+    stop_button.when_pressed = play_pause
     pause()
 else:
     while True:
         input("Hit return:")
-        do_stuff()
+        # do_stuff()
+        play_pause()

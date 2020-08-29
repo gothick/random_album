@@ -35,11 +35,12 @@ def toggle_playback(client_id, client_secret, redirect_uri, username):
         sp = spotipy.Spotify(auth=token)
         p = sp.current_playback()
         if p and p['is_playing']:
+            logging.info('Pausing playback')
             sp.pause_playback()
         else:
             # Wasn't playing. Start.
+            logging.info('Resuming playback')
             sp.start_playback()
-        logging.debug(p)
     else:
         print('Could not authenticate.')
 
