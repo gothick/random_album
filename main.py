@@ -57,11 +57,12 @@ def play_pause():
     return
 
 def do_stuff():
+    logging.debug('In do_stuff');
     device_name = config.DEVICE_NAME
-    if shift_button.is_pressed:
-        device_name = None
-        logging.info('Shift key hold detected')
     if gpio_available:
+        if shift_button.is_pressed:
+            device_name = None
+            logging.info('Shift key hold detected')
         led.blink(on_time = 0.3, n = 1)
     if args.test:
         print('playing')
@@ -88,5 +89,5 @@ if gpio_available:
 else:
     while True:
         input("Hit return:")
-        # do_stuff()
-        play_pause()
+        do_stuff()
+        # play_pause()
