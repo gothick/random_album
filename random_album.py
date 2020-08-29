@@ -21,7 +21,8 @@ def find_device_id_by_name(sp, name):
     if device:
         return device['id']
 
-def toggle_playback(client_id, client_secret, redirect_uri, username):
+def toggle_playback(client_id, client_secret, redirect_uri, username) -> bool:
+    did_something = False
     scope = 'user-read-playback-state user-modify-playback-state'
     logging.info('Prompting for user token')
     token = util.prompt_for_user_token(
@@ -37,12 +38,20 @@ def toggle_playback(client_id, client_secret, redirect_uri, username):
         if p and p['is_playing']:
             logging.info('Pausing playback')
             sp.pause_playback()
+            did_something = True
         else:
-            # Wasn't playing. Start.
-            logging.info('Resuming playback')
-            sp.start_playback()
+            # Wasn't playing. But we can't just start;
+            # we have to see if it's possible first.
+            logging.debug(p)
+            if p:
+                logging.info('Resuming playback')
+                sp.start_playback()
+                did_something = True
+            else:
+                logging.info('Nothing to resume')
     else:
         print('Could not authenticate.')
+    return did_something
 
 def play_random_album(client_id, client_secret, redirect_uri, username, target_playlist, device_name, album_minimum_tracks = 0):
     # Spotify app scopes (permissions)

@@ -46,14 +46,17 @@ if gpio_available:
 print('Ready')
 
 def play_pause():
-    toggle_playback(
+    did_something = toggle_playback(
         creds.SPOTIPY_CLIENT_ID,
         creds.SPOTIPY_CLIENT_SECRET,
         creds.REDIRECT_URI,
         config.USERNAME
     )
     if gpio_available:
-        stop_led.blink(on_time = 0.05, off_time = 0.05, n = 3)
+        if did_something:
+            stop_led.blink(on_time = 0.05, off_time = 0.05, n = 3)
+        else:
+            stop_led.blink(on_time = 0.3, off_time = 0.3, n = 3)
     return
 
 def do_stuff():
@@ -89,5 +92,5 @@ if gpio_available:
 else:
     while True:
         input("Hit return:")
-        do_stuff()
-        # play_pause()
+        # do_stuff()
+        play_pause()
