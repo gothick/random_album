@@ -53,7 +53,7 @@ def stop_stuff():
         config.USERNAME
     )
     if gpio_available:
-        stop_led.blink(on_time = 0.05, off_time = 0.05, n = 7)
+        stop_led.blink(on_time = 0.05, off_time = 0.05, n = 3)
     return
 
 def do_stuff():
