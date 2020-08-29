@@ -1,6 +1,6 @@
 import creds
 import config
-from random_album import play_random_album
+from random_album import play_random_album, stop_playing
 
 import argparse
 import logging
@@ -40,9 +40,21 @@ def sigterm_handler(signal, frame):
 
 if gpio_available:
     led = PWMLED(config.GPIO_LED, active_high = False)
+    stop_led = PWMLED(config.GPIO_STOP_LED)
     signal(SIGTERM, sigterm_handler)
 
 print('Ready')
+
+def stop_stuff():
+    stop_playing(
+        creds.SPOTIPY_CLIENT_ID,
+        creds.SPOTIPY_CLIENT_SECRET,
+        creds.REDIRECT_URI,
+        config.USERNAME
+    )
+    if gpio_available:
+        stop_led.blink(on_time = 0.3, n = 3)
+    return
 
 def do_stuff():
     device_name = config.DEVICE_NAME
@@ -69,7 +81,9 @@ def do_stuff():
 if gpio_available:
     button = Button(config.GPIO_BUTTON) # Defaults to pull-up using internal resistor
     shift_button = Button(config.GPIO_SHIFT_BUTTON) # Hold this button down to do something different
+    stop_button = Button(config.GPIO_STOP_BUTTON)
     button.when_pressed = do_stuff
+    stop_button.when_pressed = stop_stuff
     pause()
 else:
     while True:

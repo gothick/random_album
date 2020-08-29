@@ -21,6 +21,24 @@ def find_device_id_by_name(sp, name):
     if device:
         return device['id']
 
+def stop_playing(client_id, client_secret, redirect_uri, username):
+    scope = 'user-read-playback-state user-modify-playback-state'
+    logging.info('Prompting for user token')
+    token = util.prompt_for_user_token(
+        username,
+        scope,
+        client_id,
+        client_secret,
+        redirect_uri
+    )
+    if token:
+        sp = spotipy.Spotify(auth=token)
+        sp.pause_playback()
+    else:
+        print('Could not authenticate.')
+
+
+
 def play_random_album(client_id, client_secret, redirect_uri, username, target_playlist, device_name, album_minimum_tracks = 0):
     # Spotify app scopes (permissions)
     scope = 'streaming user-read-playback-state user-modify-playback-state playlist-read-private app-remote-control'
