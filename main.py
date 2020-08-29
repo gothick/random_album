@@ -1,6 +1,6 @@
 import creds
 import config
-from random_album import play_random_album, stop_playing
+from random_album import play_random_album, toggle_playback
 
 import argparse
 import logging
@@ -46,7 +46,7 @@ if gpio_available:
 print('Ready')
 
 def stop_stuff():
-    stop_playing(
+    toggle_playback(
         creds.SPOTIPY_CLIENT_ID,
         creds.SPOTIPY_CLIENT_SECRET,
         creds.REDIRECT_URI,
