@@ -92,5 +92,5 @@ if gpio_available:
 else:
     while True:
         input("Hit return:")
-        # do_stuff()
-        play_pause()
+        do_stuff()
+        # play_pause()
