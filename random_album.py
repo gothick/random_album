@@ -34,16 +34,16 @@ class RandomAlbum:
         return playlist
 
     def __find_device_id_by_name(self, sp, name):
-        # Beacuse the Amazon devices have started coming back like:
-        # 2e1b9eca-eb34-42bb-a270-c5a044d3de62_amzn_1 when what
-        # actually works here is "2e1b9eca-eb34-42bb-a270-c5a044d3de62"
-        # https://community.spotify.com/t5/Spotify-for-Developers/player-transfer-to-Echo-Dot-Groups-failing/m-p/5509388#M8084
-        name = name.split('_amzn', 1)[0]
         results = sp.devices()
         devices = results['devices']
         device = next(filter(lambda d: d['name'] == name, devices), None)
         if device:
-            return device['id']
+            # Beacuse the Amazon devices have started coming back like:
+            # 2e1b9eca-eb34-42bb-a270-c5a044d3de62_amzn_1 when what
+            # actually works here is "2e1b9eca-eb34-42bb-a270-c5a044d3de62"
+            # https://community.spotify.com/t5/Spotify-for-Developers/player-transfer-to-Echo-Dot-Groups-failing/m-p/5509388#M8084
+            device_id = device['id'].split('_amzn', 1)[0]
+            return device_id
 
     def toggle_playback(self) -> bool:
         did_something = False
