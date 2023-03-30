@@ -1,6 +1,6 @@
 import creds
 import config
-from random_album import play_random_album, toggle_playback
+from random_album import RandomAlbum
 
 import argparse
 import logging
@@ -46,12 +46,7 @@ if gpio_available:
 print('Ready')
 
 def play_pause():
-    did_something = toggle_playback(
-        creds.SPOTIPY_CLIENT_ID,
-        creds.SPOTIPY_CLIENT_SECRET,
-        creds.REDIRECT_URI,
-        config.USERNAME
-    )
+    did_something = ra.toggle_playback()
     if gpio_available:
         if did_something:
             stop_led.blink(on_time = 0.05, off_time = 0.05, n = 3)
@@ -71,17 +66,12 @@ def do_stuff():
         print('playing')
         sleep(1)
     else:
-        play_random_album(
-            creds.SPOTIPY_CLIENT_ID,
-            creds.SPOTIPY_CLIENT_SECRET,
-            creds.REDIRECT_URI,
-            config.USERNAME,
-            config.PLAYLIST,
-            device_name,
-            config.ALBUM_MINIMUM_TRACKS)
+        ra.play_random_album(config.PLAYLIST, device_name, config.ALBUM_MINIMUM_TRACKS)
     if gpio_available:
         led.blink(on_time = 0.1, off_time = 0.1, n = 3)
 
+
+ra = RandomAlbum(config.USERNAME, creds.SPOTIPY_CLIENT_ID, creds.SPOTIPY_CLIENT_SECRET, creds.REDIRECT_URI)
 if gpio_available:
     button = Button(config.GPIO_BUTTON) # Defaults to pull-up using internal resistor
     shift_button = Button(config.GPIO_SHIFT_BUTTON) # Hold this button down to do something different
