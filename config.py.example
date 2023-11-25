@@ -1,11 +1,8 @@
 USERNAME="gothick"
 DEVICE_NAME="Stereo Sub Pair"
-PLAYLIST="Future Listening"
+PLAYLISTS=["Future Listening", "Work: Calm Ambient", "Reading and Relaxing"]
 ALBUM_MINIMUM_TRACKS=4
 
-# Rasperry Pi GPIO pin assignments
-GPIO_LED=26
-GPIO_BUTTON=6
-GPIO_SHIFT_BUTTON=5
-GPIO_STOP_BUTTON=0
-GPIO_STOP_LED=13
+# Pi
+BUTTON_PINS=[6, 5, 0]
+LED_PINS=[26, 19, 13]
