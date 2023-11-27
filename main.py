@@ -46,6 +46,9 @@ print('Ready')
 
 def do_stuff(i):
     logging.info(f'In do_stuff ({i})');
+    if gpio_available:
+        leds[i].blink(on_time = 0.1, off_time = 0.1, n = 1)
+
     device_name = config.DEVICE_NAME
     if args.test:
         print('playing')
