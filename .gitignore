@@ -3,6 +3,8 @@
 creds.py
 config.py
 
+.claude
+
 # Spotipy Caches
 .cache-*
 

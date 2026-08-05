@@ -1,5 +1,4 @@
 import spotipy
-import spotipy.util as util
 import random
 import logging
 
@@ -10,18 +9,23 @@ class RandomAlbum:
         self.client_id = client_id
         self.client_secret = client_secret
         self.redirect_uri = redirect_uri
+        # Built lazily and then reused for the lifetime of the process, so we
+        # only pay for a fresh TLS connection once rather than on every
+        # button press (that handshake was costing ~5s per press on a Pi 1).
+        self.__sp = None
 
     def __get_sp(self):
-        logging.info('Prompting for user token.')
-        token = util.prompt_for_user_token(self.username, self.scope, self.client_id, self.client_secret, self.redirect_uri)
-        if token:
-            sp = spotipy.Spotify(auth=token)
-        else:
-            # Getting the token will likely throw an exception rather than
-            # just return Nothing, but just in case...
-            print('Could not authenticate.')
-            sp = None
-        return sp
+        if self.__sp is None:
+            logging.info('Creating Spotify client.')
+            auth_manager = spotipy.SpotifyOAuth(
+                username=self.username,
+                scope=self.scope,
+                client_id=self.client_id,
+                client_secret=self.client_secret,
+                redirect_uri=self.redirect_uri,
+            )
+            self.__sp = spotipy.Spotify(auth_manager=auth_manager)
+        return self.__sp
 
     def __find_playlist_by_name(self, sp, name):
         results = sp.current_user_playlists(limit = 50, offset = 0)
