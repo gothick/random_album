@@ -11,6 +11,8 @@ config.py
 # Emacs
 *~
 
+main.build
+
 # macOS
 # General
 .DS_Store
