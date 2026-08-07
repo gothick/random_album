@@ -34,6 +34,7 @@ except ImportError:
 def sigterm_handler(signal, frame):
     # If systemd kills our process we want to shut down gracefully, releasing
     # our GPIO pins and as a side-effect, turning off the LED.
+    ra.stop_keepalive()
     [button.close() for button in buttons]
     [led.close() for led in leds]
 
@@ -58,7 +59,9 @@ def do_stuff(i):
     if gpio_available:
         leds[i].blink(on_time = 0.1, off_time = 0.1, n = 3)
 
-ra = RandomAlbum(config.USERNAME, creds.SPOTIPY_CLIENT_ID, creds.SPOTIPY_CLIENT_SECRET, creds.REDIRECT_URI)
+ra = RandomAlbum(config.USERNAME, creds.SPOTIPY_CLIENT_ID, creds.SPOTIPY_CLIENT_SECRET, creds.REDIRECT_URI, config.PLAYLIST_CACHE_MAX_AGE_SECONDS)
+if not args.test:
+    ra.start_keepalive(config.KEEPALIVE_INTERVAL_SECONDS)
 if gpio_available:
     for i, b in enumerate(buttons):
         # https://stackoverflow.com/a/2295372/300836

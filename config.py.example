@@ -2,6 +2,14 @@ USERNAME="gothick"
 DEVICE_NAME="Stereo Sub Pair"
 PLAYLISTS=["Future Listening", "Work: Calm Ambient", "Reading and Relaxing"]
 ALBUM_MINIMUM_TRACKS=4
+# How often (in seconds) to ping the Spotify API in the background so the
+# connection doesn't sit idle long enough to be dropped, which would make the
+# next button press pay for a slow, full TLS handshake.
+KEEPALIVE_INTERVAL_SECONDS=240
+# How old (in seconds) a cached playlist's track listing can get before the
+# keepalive timer rebuilds it. Playlist membership changes don't affect
+# playback, since we play by album URI, so this can safely be generous.
+PLAYLIST_CACHE_MAX_AGE_SECONDS=7*24*60*60
 
 # Pi
 BUTTON_PINS=[6, 5, 0]

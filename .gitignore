@@ -8,6 +8,9 @@ config.py
 # Spotipy Caches
 .cache-*
 
+# Cached playlist contents
+.playlist_cache-*.json
+
 # Emacs
 *~
 
