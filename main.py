@@ -24,7 +24,7 @@ if args.verbose == 2:
 # We may not be running on a Pi
 gpio_available = True
 try:
-    from gpiozero import Button, PWMLED
+    from gpiozero import Button, LED
     from signal import pause,signal,SIGTERM
     logging.info('Gpiozero found')
 except ImportError:
@@ -39,7 +39,7 @@ def sigterm_handler(signal, frame):
     [led.close() for led in leds]
 
 if gpio_available:
-    leds = [PWMLED(pin, active_high = False) for pin in config.LED_PINS]
+    leds = [LED(pin, active_high = False) for pin in config.LED_PINS]
     buttons = [Button(pin) for pin in config.BUTTON_PINS]
     signal(SIGTERM, sigterm_handler)
 
