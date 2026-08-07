@@ -22,9 +22,12 @@ class RandomAlbum:
         # GPIO button callbacks and from the keepalive timer thread below.
         self.__lock = threading.Lock()
         self.__keepalive_timer = None
-        # Playlist names we've been asked to play from, so the keepalive
-        # timer knows which on-disk caches to keep fresh.
-        self.__known_playlists = set()
+        # Parsed playlist caches, kept in memory for the lifetime of the
+        # process (keyed by playlist name) so a button press never has to
+        # re-read and re-parse a, potentially large, cache file from disk.
+        # The on-disk copy exists purely so a fresh process start doesn't
+        # need to rebuild from the API immediately.
+        self.__playlist_caches = {}
 
     def __get_sp(self):
         if self.__sp is None:
@@ -115,16 +118,20 @@ class RandomAlbum:
             'tracks': tracks,
         }
         self.__save_playlist_cache(target_playlist, cache)
+        self.__playlist_caches[target_playlist] = cache
         logging.info(f"Refreshed playlist cache for '{target_playlist}' ({len(tracks)} tracks).")
         return cache
 
     def __get_playlist_cache(self, target_playlist):
-        self.__known_playlists.add(target_playlist)
+        cache = self.__playlist_caches.get(target_playlist)
+        if cache is not None:
+            return cache
         cache = self.__load_playlist_cache(target_playlist)
-        if cache is None:
-            logging.info(f"No cache yet for playlist '{target_playlist}'; fetching now.")
-            cache = self.__refresh_playlist_cache(target_playlist)
-        return cache
+        if cache is not None:
+            self.__playlist_caches[target_playlist] = cache
+            return cache
+        logging.info(f"No cache yet for playlist '{target_playlist}'; fetching now.")
+        return self.__refresh_playlist_cache(target_playlist)
 
     def toggle_playback(self) -> bool:
         did_something = False
@@ -192,9 +199,10 @@ class RandomAlbum:
             with self.__lock:
                 sp = self.__get_sp()
                 sp.current_user()
-                for playlist_name in self.__known_playlists:
-                    cache = self.__load_playlist_cache(playlist_name)
-                    if cache is None or self.__cache_is_stale(cache):
+                # Iterate the in-memory caches (not the disk files) so a
+                # staleness check never costs us a large JSON parse either.
+                for playlist_name, cache in list(self.__playlist_caches.items()):
+                    if self.__cache_is_stale(cache):
                         self.__refresh_playlist_cache(playlist_name)
             logging.debug('Keepalive ping sent.')
         except Exception:
