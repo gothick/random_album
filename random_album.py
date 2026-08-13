@@ -18,8 +18,9 @@ class RandomAlbum:
         # only pay for a fresh TLS connection once rather than on every
         # button press (that handshake was costing ~5s per press on a Pi 1).
         self.__sp = None
-        # Guards self.__sp and the playlist caches: they're used both from
-        # GPIO button callbacks and from the keepalive timer thread below.
+        # Guards self.__sp, the playlist caches and the device id cache:
+        # they're used both from GPIO button callbacks and from the
+        # keepalive timer thread below.
         self.__lock = threading.Lock()
         self.__keepalive_timer = None
         # Parsed playlist caches, kept in memory for the lifetime of the
@@ -28,6 +29,13 @@ class RandomAlbum:
         # The on-disk copy exists purely so a fresh process start doesn't
         # need to rebuild from the API immediately.
         self.__playlist_caches = {}
+        # Resolved Spotify Connect device ids, keyed by device name. Device
+        # lists can be flaky (a speaker group that hasn't been "woken" up
+        # yet just won't be in sp.devices()), and ids aren't guaranteed
+        # stable forever either, so this is a cache, not a fact: a failed
+        # start_playback drops the entry and re-resolves before the next
+        # attempt rather than trusting it indefinitely.
+        self.__device_ids = {}
 
     def __get_sp(self):
         if self.__sp is None:
@@ -63,6 +71,31 @@ class RandomAlbum:
             # https://community.spotify.com/t5/Spotify-for-Developers/player-transfer-to-Echo-Dot-Groups-failing/m-p/5509388#M8084
             device_id = device['id'].split('_amzn', 1)[0]
             return device_id
+
+    def __resolve_device_id(self, sp, name, attempts = 3, retry_delay_seconds = 1):
+        # Spotify Connect device discovery (especially for speaker groups)
+        # can lag a button press, so give it a couple of short retries
+        # before accepting that the device really isn't there right now.
+        for attempt in range(attempts):
+            device_id = self.__find_device_id_by_name(sp, name)
+            if device_id:
+                return device_id
+            if attempt < attempts - 1:
+                time.sleep(retry_delay_seconds)
+        logging.warning(f"Could not find a device called '{name}' after {attempts} attempt(s); falling back to Spotify's currently active device.")
+        return None
+
+    def __get_device_id(self, sp, name):
+        device_id = self.__device_ids.get(name)
+        if device_id is not None:
+            return device_id
+        device_id = self.__resolve_device_id(sp, name)
+        if device_id is not None:
+            self.__device_ids[name] = device_id
+        return device_id
+
+    def __invalidate_device_id(self, name):
+        self.__device_ids.pop(name, None)
 
     def __cache_path_for_playlist(self, name):
         slug = re.sub(r'[^a-z0-9]+', '_', name.lower()).strip('_')
@@ -169,7 +202,7 @@ class RandomAlbum:
 
             device_id = None
             if device_name is not None:
-                device_id = self.__find_device_id_by_name(sp, device_name)
+                device_id = self.__get_device_id(sp, device_name)
 
             # A cached track's album may occasionally have vanished from
             # Spotify entirely since we last refreshed. If so, just spin the
@@ -187,6 +220,13 @@ class RandomAlbum:
                     return
                 except spotipy.SpotifyException:
                     logging.exception(f"Couldn't play '{track['album_name']}'; trying a different album, the cache may be stale.")
+                    if device_name is not None:
+                        # The failure might equally be a stale cached
+                        # device_id rather than a stale album URI, so drop
+                        # it and re-resolve from scratch before the next
+                        # attempt.
+                        self.__invalidate_device_id(device_name)
+                        device_id = self.__get_device_id(sp, device_name)
             logging.error(f"Gave up trying to play an album from '{target_playlist}' after {max_attempts} attempt(s).")
 
     def keep_alive(self):
