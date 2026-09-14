@@ -236,9 +236,15 @@ class RandomAlbum:
         playlist cache that's gone stale, so that work never falls on a
         button press either."""
         try:
+            # Deliberately ping the API *outside* self.__lock: this call
+            # doesn't touch any of the state the lock protects, and holding
+            # it here would block a button press for as long as the network
+            # call takes to time out (e.g. a slow/flaky DNS lookup), making
+            # the whole thing look hung.
             with self.__lock:
                 sp = self.__get_sp()
-                sp.current_user()
+            sp.current_user()
+            with self.__lock:
                 # Iterate the in-memory caches (not the disk files) so a
                 # staleness check never costs us a large JSON parse either.
                 for playlist_name, cache in list(self.__playlist_caches.items()):
