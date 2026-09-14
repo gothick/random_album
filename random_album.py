@@ -189,6 +189,7 @@ class RandomAlbum:
 
     def play_random_album(self, target_playlist, device_name, album_minimum_tracks = 0):
         with self.__lock:
+            logging.info(f"Preparing to play a random album from playlist '{target_playlist}' on device '{device_name}' with minimum {album_minimum_tracks} tracks.")
             sp = self.__get_sp()
             cache = self.__get_playlist_cache(target_playlist)
 
@@ -214,6 +215,7 @@ class RandomAlbum:
                 print(f"Found track {track['name']} by {track['artist']}")
                 print(f"...from an album called {track['album_name']}")
                 print(f"...with {track['album_total_tracks']} tracks.")
+                logging.info(f"Attempting to play album '{track['album_name']}' by {track['artist']}")
                 try:
                     sp.start_playback(context_uri = track['album_uri'], device_id = device_id)
                     print("Started playback of entire album.")
