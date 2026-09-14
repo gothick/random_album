@@ -6,7 +6,8 @@ Wants=network-online.target
 
 [Service]
 Type=simple
-ExecStart=/home/pi/random_album/.venv/bin/python /home/pi/random_album/main.py
+Environment=PYTHONUNBUFFERED=1
+ExecStart=/home/pi/random_album/.venv/bin/python /home/pi/random_album/main.py -v
 WorkingDirectory=/home/pi/random_album
 # StandardOutput=inherit
 # StandardError=inherit
